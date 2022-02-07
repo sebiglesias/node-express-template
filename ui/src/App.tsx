@@ -1,17 +1,22 @@
-import React, {useEffect, useState} from 'react';
-import logo from './logo.svg';
+import React, {useCallback, useEffect, useState} from 'react';
 import './App.css';
 import {BrowserRouter, Route, Routes} from "react-router-dom";
-import {Example} from "./example/example";
-import {useExampleApi} from "./apis/useExampleApi";
 import {ExampleType} from "./example/model";
+import {AutocompleteBox} from "./autocompleteBox/autocompleteBox";
+import {setWords} from "./autocompleteBox/boxSlice";
+import {useWordsApi} from "./apis/useWordsApis";
+import {useDispatch} from "react-redux";
 
 export const App = () => {
-    const api = useExampleApi()
+    const api = useWordsApi()
+    const dispatch = useDispatch()
     const [examples, setExamples] = useState<ExampleType[]>([])
-    useEffect(() => {
-        api.getExamples().then(res => setExamples(res))
-    }, [])
+
+    const lookWordFn = useCallback((word: string) => {
+        api.getWords(word).then(res => {
+            dispatch(setWords(res))
+        }).catch(e =>e)
+    }, [api])
 
   return (
     <div className="App">
@@ -19,19 +24,7 @@ export const App = () => {
             <Routes>
                 <Route path="/" element={
                     <header className="App-header">
-                        <img src={logo} className="App-logo" alt="logo" />
-                        <p>
-                            Edit <code>src/App.tsx</code> and save to reload.
-                        </p>
-                        {examples.map(example => <Example example={example} />)}
-                        <a
-                            className="App-link"
-                            href="https://reactjs.org"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            Learn React
-                        </a>
+                        <AutocompleteBox lookWordFn={lookWordFn} />
                     </header>
                 }/>
             </Routes>
