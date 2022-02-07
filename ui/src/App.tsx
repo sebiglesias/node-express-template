@@ -1,10 +1,18 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import logo from './logo.svg';
 import './App.css';
 import {BrowserRouter, Route, Routes} from "react-router-dom";
 import {Example} from "./example/example";
+import {useExampleApi} from "./apis/useExampleApi";
+import {ExampleType} from "./example/model";
 
-function App() {
+export const App = () => {
+    const api = useExampleApi()
+    const [examples, setExamples] = useState<ExampleType[]>([])
+    useEffect(() => {
+        api.getExamples().then(res => setExamples(res))
+    }, [])
+
   return (
     <div className="App">
         <BrowserRouter>
@@ -15,7 +23,7 @@ function App() {
                         <p>
                             Edit <code>src/App.tsx</code> and save to reload.
                         </p>
-                        <Example name={'example'} />
+                        {examples.map(example => <Example example={example} />)}
                         <a
                             className="App-link"
                             href="https://reactjs.org"
